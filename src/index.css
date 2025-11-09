@@ -1,0 +1,37 @@
+
+
+.fade-up{
+
+    animation: fade-up-ani 0.5s ease-out forwards;
+    
+}
+
+@keyframes fade-up-ani {
+
+    from{
+        transform: translateY(20px);
+        opacity: 0;
+        filter: blur(10x);
+    }
+    
+}
+
+
+html {
+  overflow-y: scroll;
+}
+
+
+.btn-pro{
+    animation: slide-left 0.5s linear forwards;
+}
+
+
+@keyframes slide-left {
+
+    to{
+        transform: translateX(1rem);
+    }
+
+}
+
