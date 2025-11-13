@@ -55,7 +55,7 @@ const OrderSummaryCard = () => {
         </div>
         
       
-        <button onClick={()=>{ dispatch(markProductsAsSold(cartItems)).then(()=>dispatch(clearCart())) }} className="w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg mt-6 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">
+        <button onClick={()=>{window.confirm('Are you sure')&& dispatch(markProductsAsSold(cartItems)).then(()=>dispatch(clearCart())) }} className="w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg mt-6 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">
           Proceed to Checkout
         </button>
 

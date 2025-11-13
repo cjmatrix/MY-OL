@@ -10,6 +10,7 @@ import { useDispatch ,useSelector } from 'react-redux'
 import { checkUserSession } from './features/authSlice'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
+import { ToastContainer } from 'react-toastify';
 
 function App() {
       const layoutRef=useRef(null)
@@ -47,6 +48,18 @@ function App() {
      
       <Navbar></Navbar>
       <Outlet>  </Outlet>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
    </>
 

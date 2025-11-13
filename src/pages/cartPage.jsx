@@ -8,8 +8,9 @@ import OrderSummaryCard from "../components/OrderSummuryCard";
 import React from "react";
 import EmptyCart from "../components/EmptyCart";
 import { clearCart } from "../features/cartSlice";
+import ConfirmationModal from "../components/Confirm";
 
-// You can move this SVG to its own component file if you prefer
+
 const TrashIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -31,7 +32,7 @@ const CartPage = () => {
   const { cartItems, totalPrice } = useSelector((state) => state.carts);
   const dispatch = useDispatch();
 
-  // console.log(cartItems)
+
 
   const listingCart = cartItems.map((obj) => {
     return (
@@ -109,7 +110,9 @@ const CartPage = () => {
           Clear All
         </button>
         </div>
+        
     </div>
+
   ) : (
     <div className="fade-up">
         <EmptyCart></EmptyCart>

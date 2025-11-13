@@ -147,6 +147,11 @@ const Navbar = () => {
 
   }
 
+  function getNavLinkClassLogin({isActive}){
+
+    return isActive? ' flex items-center px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors duration-200':"flex items-center px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors duration-200"
+
+  }
   console.log(user);
 
   
@@ -212,7 +217,8 @@ const Navbar = () => {
               ) : (
                 <NavLink
                   to='/login'
-                  className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors duration-200"
+                  className={getNavLinkClassLogin}
+                  
                 >
                   <span>Login/Signup</span>
                 </NavLink>

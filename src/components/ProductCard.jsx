@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '../features/cartSlice';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-
+import { toast } from 'react-toastify';
 const CartIcon = () => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
@@ -50,13 +50,14 @@ const ProductCard = ({ product }) => {
 
     const handleAddToCart = () => {
         animateCard(); 
-        dispatch(addToCart(product)); 
+       
+        dispatch(addToCart(product)).then(()=> toast.success(`${product.title} added to cart!`)); 
     };
 
     return (
        <div 
             ref={cardRef} 
-            className={`bg-white ${product.sold ? 'opacity-60 line-through decoration-gray-500/80' : ''} rounded-lg shadow-md overflow-hidden w-[24rem] mb-8`}
+            className={`bg-white ${product.sold ? 'opacity-60 line-through decoration-gray-500/80' : ''} rounded-lg shadow-md overflow-hidden w-[24rem] mb-8 `}
         >
         
             <div className="relative">

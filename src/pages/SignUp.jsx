@@ -1,29 +1,37 @@
-import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase/config";
+import React from 'react';
+import { useForm } from 'react-hook-form'; // Import useForm
 import { signupUser } from '../features/authSlice';
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 function SignUp() {
     
-    const [activeTab, setActiveTab] = useState('login'); 
-    const {status}=useSelector((state)=>state.auth)
+    const { status, error } = useSelector((state) => state.auth);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const[username,setUsername]=useState('')
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const navigate=useNavigate()
-    const dispatch=useDispatch();
+    const { 
+        register, 
+        handleSubmit, 
+        formState: { errors, isSubmitting },
+        getValues 
+    } = useForm();
 
-    const handleSignUp = async (e) => {
-          e.preventDefault(); 
-          dispatch(signupUser({email,password})).unwrap().then(()=>navigate('/products'))
+    const onSubmit = async (data) => {
+        try {
           
-
-          
+            await dispatch(signupUser({ email: data.email, password: data.password })).unwrap();
+            navigate('/products');
+        } catch (rejectedError) {
+            console.error("Signup failed:", rejectedError);
+           
+        }
     };
 
+    const FormError = ({ message }) => {
+        if (!message) return null;
+        return <span className="text-red-500 text-sm mt-1">{message}</span>;
+    };
 
     return (
        
@@ -61,44 +69,36 @@ function SignUp() {
                     <div className="grid grid-cols-2 gap-2 bg-gray-100 p-1 rounded-md mb-6 ">
                         <button
                             type="button"
-                            onClick={() => {setActiveTab('login');navigate('/login')}}
-                            className={
-                               
-                                  
-                                     'text-gray-500 font-medium py-2 rounded-md hover:bg-gray-200'
-                            }
+                            onClick={() => navigate('/login')}
+                            className={'text-gray-500 font-medium py-2 rounded-md hover:bg-gray-200'}
                         >
                             Login
                         </button>
                         <button
                             type="button"
-                            onClick={() => setActiveTab('register')}
-                            className={
-                               
-                                    'bg-white text-gray-900 font-medium py-2 rounded-md shadow-sm'
-                                  
-                            }
+                            onClick={() => { /* Already on register page */ }}
+                            className={'bg-white text-gray-900 font-medium py-2 rounded-md shadow-sm'}
                         >
                             Register
                         </button>
                     </div>
 
                    
-                    <form onSubmit={handleSignUp} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                          <div>
-                            <label htmlFor="text" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                                 Username
                             </label>
                             <input 
                                 type="text" 
-                                id="user" 
-                                name="user"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                id="username" 
                                 placeholder="Username"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                required
+                                {...register("username", {
+                                    required: "Username is required"
+                                })}
                             />
+                            <FormError message={errors.username?.message} />
                         </div>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -107,13 +107,17 @@ function SignUp() {
                             <input 
                                 type="email" 
                                 id="email" 
-                                name="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                required
+                                {...register("email", {
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: "Invalid email address"
+                                    }
+                                })}
                             />
+                            <FormError message={errors.email?.message} />
                         </div>
                         
                 
@@ -124,23 +128,48 @@ function SignUp() {
                             <input 
                                 type="password" 
                                 id="password" 
-                                name="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                required
+                                {...register("password", {
+                                    required: "Password is required",
+                                    minLength: {
+                                        value: 6,
+                                        message: "Password must be at least 6 characters"
+                                    }
+                                })}
                             />
+                            <FormError message={errors.password?.message} />
                         </div>
 
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                Confirm Password
+                            </label>
+                            <input 
+                                type="password" 
+                                id="confirmPassword" 
+                                placeholder="••••••"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                {...register("confirmPassword", {
+                                    required: "Please confirm your password",
+                                    validate: (value) =>
+                                        value === getValues("password") || "Passwords do not match"
+                                })}
+                            />
+                            <FormError message={errors.confirmPassword?.message} />
+                        </div>
+
+                        {status === 'failed' && <FormError message={error} />}
                
                         <div>
                             <button 
                                 type="submit"
-                                className="w-full bg-cyan-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-cyan-600 transition-colors duration-200"
+                                disabled={isSubmitting || status === 'loading'}
+                                className="w-full bg-cyan-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-cyan-600 transition-colors duration-200
+                                           disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
                               
-                              {status==='loading'?'Signing...':'Sign Up'}
+                              {isSubmitting || status === 'loading' ? 'Signing up...' : 'Sign Up'}
                             </button>
                         </div>
                     </form>

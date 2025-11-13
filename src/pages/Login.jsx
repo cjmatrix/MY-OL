@@ -1,37 +1,42 @@
-import React, { useState } from 'react';
-
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { loginUser } from '../features/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
-import { checkUserSession } from '../features/authSlice';
 import { useNavigate } from 'react-router-dom';
+
 function Login() {
     
-    const [activeTab, setActiveTab] = useState('login'); 
-    const {user,status,error}=useSelector(state=>state.auth)
-    const dispatch=useDispatch()
-    const navigate=useNavigate()
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const { user, status, error } = useSelector(state => state.auth);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        dispatch(loginUser({email,password}))
+    const { 
+        register, 
+        handleSubmit, 
+        formState: { errors, isSubmitting } 
+    } = useForm();
+
+    const onSubmit = async (data) => {
+        try {
+            await dispatch(loginUser({ email: data.email, password: data.password })).unwrap();
+            // The useEffect below will handle navigation on success
+        } catch (rejectedError) {
+            // Error is already handled and displayed by the 'status' and 'error' from useSelector
+            console.error("Login failed:", rejectedError);
+        }
     };
 
-    // useEffect(() => {
-    
-    //     dispatch(checkUserSession());
+    useEffect(() => {   
+        if (user) {
+            navigate('/products');
+        }
+    }, [status, user, navigate]);
 
-    // }, [dispatch]);
-    
-
-    useEffect(()=>{
-        if(user)
-        navigate('/products')
-
-    },[status,user])
-
+    const FormError = ({ message }) => {
+        if (!message) return null;
+        return <span className="text-red-500 text-sm mt-1">{message}</span>;
+    };
     
 
     return (
@@ -62,7 +67,6 @@ function Login() {
 
           
                 <div className="bg-white p-8 rounded-lg shadow-md w-[480px]">
-                    {/* <h1>Error {error}</h1> */}
              
                     <h2 className="text-2xl font-semibold text-gray-900">Get Started</h2>
                     <p className="text-sm text-gray-600 mt-1 mb-6">Login or create a new account</p>
@@ -71,31 +75,22 @@ function Login() {
                     <div className="grid grid-cols-2 gap-2 bg-gray-100 p-1 rounded-md mb-6 ">
                         <button
                             type="button"
-                            onClick={() => {setActiveTab('login');navigate('/login')}}
-                            className={
-                                
-                                     'bg-white text-gray-900 font-medium py-2 rounded-md shadow-sm '
-                                   
-                            }
+                            onClick={() => navigate('/login')}
+                            className={'bg-white text-gray-900 font-medium py-2 rounded-md shadow-sm '}
                         >
-                            
                             Login
                         </button>
                         <button
                             type="button"
-                            onClick={() => {setActiveTab('register'); navigate('/signup')}}
-                            className={
-                             
-                                    
-                                    'text-gray-500 font-medium py-2 rounded-md hover:bg-gray-200'
-                            }
+                            onClick={() => navigate('/signup')}
+                            className={'text-gray-500 font-medium py-2 rounded-md hover:bg-gray-200'}
                         >
                             Register
                         </button>
                     </div>
 
                    
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -104,13 +99,17 @@ function Login() {
                             <input 
                                 type="email" 
                                 id="email" 
-                                name="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                required
+                                {...register("email", {
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: "Invalid email address"
+                                    }
+                                })}
                             />
+                            <FormError message={errors.email?.message} />
                         </div>
                         
                 
@@ -121,23 +120,30 @@ function Login() {
                             <input 
                                 type="password" 
                                 id="password" 
-                                name="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                required
+                                {...register("password", {
+                                    required: "Password is required",
+                                    minLength: {
+                                        value: 6,
+                                        message: "Password must be at least 6 characters"
+                                    }
+                                })}
                             />
+                            <FormError message={errors.password?.message} />
                         </div>
 
+                        {status === 'failed' && <FormError message={error} />}
                
                         <div>
                             <button 
                                 type="submit"
-                                className="w-full bg-cyan-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-cyan-600 transition-colors duration-200"
+                                disabled={isSubmitting || status === 'loading'}
+                                className="w-full bg-cyan-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-cyan-600 transition-colors duration-200
+                                           disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
                               
-                               Login
+                               {isSubmitting || status === 'loading' ? 'Logging in...' : 'Login'}
                             </button>
                         </div>
                     </form>
