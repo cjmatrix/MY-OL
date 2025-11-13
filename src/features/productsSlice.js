@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // --- 1. Firebase Imports ---
 // Import our configured 'db' instance and Firestore functions
-import { db } from '../firebase/config';
+import { db ,storage} from '../firebase/config';
 
 import { markProductsAsSold } from './checkoutSlice';
 
-
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import { 
   collection, 
@@ -30,8 +30,19 @@ export const fetchProducts = createAsyncThunk(
 
 export const addProduct = createAsyncThunk(
   'products/addProduct', 
-  async (productData) => {
+  async ({newProduct,imageFile}) => {
 
+    const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+
+    await uploadBytes(storageRef, imageFile);
+
+    const downloadURL = await getDownloadURL(storageRef);
+
+    const productData={
+      ...newProduct,
+      imageUrl:downloadURL
+    }
+    
     const docRef = await addDoc(collection(db, 'products'), productData);
     
 
@@ -42,10 +53,8 @@ export const addProduct = createAsyncThunk(
 export const removeProduct = createAsyncThunk(
   'products/removeProduct', 
   async (productId) => {
-   
-    const productDoc = doc(db, 'products', productId);
     
-   
+    const productDoc = doc(db, 'products', productId);
     await deleteDoc(productDoc);
     
     return productId;

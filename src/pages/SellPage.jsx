@@ -5,31 +5,60 @@ import { useNavigate } from 'react-router-dom';
 
 export default function SellPage() {
 
-    // Your existing state and logic
+  
     const [name, setName] = useState('');
     const [category, setCategory] = useState('');
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
+    const [imageFile, setImageFile] = useState(null);
+
+    const {status}=useSelector(state=>state.products)
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+
+    const handleFileChange = (e) => {
+        if (e.target.files[0]) {
+            setImageFile(e.target.files[0]);
+        }
+    };
+
     function handleSell(e) {
         e.preventDefault();
 
-        // Your existing addProduct logic
+       
         const newProduct = {
-            title: name, // Updated to match your product card's 'title' property
+            title: name, 
             category,
             price: parseFloat(price),
             description,
-            imageUrl,
             sold: false
         };
 
-        dispatch(addProduct(newProduct));
-        navigate('/products');
+        dispatch(addProduct({ newProduct, imageFile }))
+            .unwrap() // Use .unwrap() to handle navigation after promise settles 
+            .then(() => {
+                navigate('/products');
+            })
+            .catch((error) => {
+                console.error("Failed to add product:", error);
+               
+            });
+
+            //  without .unwrap()
+            // dispatch(addProduct({ newProduct, imageFile })) 
+            // .then((action) => {
+            //     // You have to check the action 'type' manually
+            //     if (action.type.endsWith('/fulfilled')) {
+            //     // The thunk succeeded!
+            //     navigate('/products');
+            //     } 
+            //     else if (action.type.endsWith('/rejected')) {
+            //     // The thunk failed!
+            //     console.error("Failed to add product:", action.payload);
+            //     }
+            // });
     }
 
     // --- New Tailwind CSS Layout ---
@@ -127,17 +156,20 @@ export default function SellPage() {
 
                     {/* Image URL */}
                     <div>
-                        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                            Image URL
+                        <label htmlFor="imageFile" className="block text-sm font-medium text-gray-700 mb-1">
+                            Product Image
                         </label>
                         <input 
-                            type="text" 
-                            id="imageUrl"
-                            placeholder='https://example.com/image.jpg' 
-                            value={imageUrl} 
-                            onChange={(e) => setImageUrl(e.target.value)} 
-                            className='w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500' 
-                            required 
+                            type="file" 
+                            id="imageFile"
+                     
+                            onChange={handleFileChange} 
+                            className='w-full p-3 border border-gray-300 rounded-md file:mr-4 file:py-2 file:px-4
+                                      file:rounded-full file:border-0
+                                      file:text-sm file:font-semibold
+                                      file:bg-teal-50 file:text-teal-700
+                                      hover:file:bg-teal-100'
+                            required
                         />
                     </div>
 
@@ -148,7 +180,7 @@ export default function SellPage() {
                                    hover:bg-orange-600 transition-colors duration-200
                                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50'
                     >
-                        List Product
+                        {status==='loading' ? 'Uploading...' : 'List Product'}
                     </button>
                 </form>
             </div>

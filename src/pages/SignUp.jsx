@@ -3,11 +3,12 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { signupUser } from '../features/authSlice';
 import {useNavigate} from 'react-router-dom'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 function SignUp() {
     
     const [activeTab, setActiveTab] = useState('login'); 
+    const {status}=useSelector((state)=>state.auth)
 
     const[username,setUsername]=useState('')
     const [email, setEmail] = useState('');
@@ -17,11 +18,12 @@ function SignUp() {
 
     const handleSignUp = async (e) => {
           e.preventDefault(); 
-          dispatch(signupUser({email,password}))  
+          dispatch(signupUser({email,password})).unwrap().then(()=>navigate('/products'))
+          
 
           
     };
-    
+
 
     return (
        
@@ -138,7 +140,7 @@ function SignUp() {
                                 className="w-full bg-cyan-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-cyan-600 transition-colors duration-200"
                             >
                               
-                               Login
+                              {status==='loading'?'Signing...':'Sign Up'}
                             </button>
                         </div>
                     </form>

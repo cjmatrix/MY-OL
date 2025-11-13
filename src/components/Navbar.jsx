@@ -118,7 +118,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const container = useRef();
   const cartRef = useRef();
-
   const { user, status, error } = useSelector((state) => state.auth);
   const {status:addStatus}=useSelector(state=>state.carts)
 
@@ -134,11 +133,12 @@ const Navbar = () => {
     () => {
       if (totalQuantity > 0) {
         const tl = gsap.timeline();
+        
         tl.to(cartRef.current, { y: -10, duration: 0.1, repeat: 1, yoyo: true,scale:1.50 });
         tl.to(cartRef.current, { rotation: 15, duration: 0.1, repeat: 3, yoyo: true, });
       }
     },
-    { dependencies: [totalQuantity], scope: container ,revertOnUpdate:true}
+    { dependencies: [totalQuantity], scope:container ,revertOnUpdate:true}
   );
 
   function getNavLinkClass({isActive}){
@@ -152,8 +152,8 @@ const Navbar = () => {
   
   return (
     <>
-      <nav className="bg-white shadow-sm py-4 px-6 sticky top-0 z-50" ref={container}>
-        <div className="flex justify-between items-center relative z-10 w-[75rem] m-auto">
+      <nav className="bg-white shadow-sm py-4 px-6 sticky top-0 z-5" ref={container}>
+        <div className="flex justify-between items-center relative z-5 w-[75rem] m-auto">
           <div className="flex items-center">
             <StorefrontIcon />
             <span className="font-bold text-xl ml-2">
@@ -235,6 +235,8 @@ const Navbar = () => {
 
       {/* Bottom thin gray line (implied from image) */}
       <div className="bg-gray-200 h-[2px]"></div>
+
+      
     </>
   );
 };

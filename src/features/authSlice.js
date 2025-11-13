@@ -107,6 +107,7 @@ export const authSlice = createSlice({
           checkUserSession.fulfilled.type
         ].includes(action.type),
         (state, action) => {
+          console.log(signupUser.fulfilled,'checking type')
           state.status = 'succeeded';
           state.user = action.payload; 
           state.error = null;

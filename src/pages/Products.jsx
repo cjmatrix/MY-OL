@@ -14,8 +14,6 @@ function Products() {
    
     const{products,status,error}=useSelector(state=>state.products)
     const dispatch=useDispatch();
-
-  
     const [search,setSearch]=useState('');
     const [category, setCategory] = useState('all');
 
@@ -64,18 +62,21 @@ function Products() {
    
 
     return (
-     
-        
         <div className='p-8 fade-up'>
-            <ProductSearchHeader search={search} setSearch={setSearch} category={category} setCategory={setCategory} ></ProductSearchHeader>
+            <ProductSearchHeader 
+                search={search} 
+                setSearch={setSearch} 
+                category={category} 
+                setCategory={setCategory} 
+            />
            
-           
-      
-            
-
-          
-            <div className='flex flex-wrap  w-[75rem] m-auto gap-[1.5rem] py-16 fade-up'>
-                <ProductCard filteredProducts={filteredProducts} ></ProductCard>
+            <div className='flex flex-wrap w-[75rem] m-auto gap-[1.5rem] py-16 fade-up'>
+                
+               
+                {filteredProducts.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                ))}
+                
             </div>
         </div>
     );
